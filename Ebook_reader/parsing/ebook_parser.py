@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 class ebook_parser(ABC):
     def __init__(self, file_path):
-        self.file_path= file_path
+        self.file_path = file_path
         print(f"Parser created for file: {self.file_path}")
     
     @abstractmethod
@@ -13,3 +13,5 @@ class ebook_parser(ABC):
 
     def validate_path(self):
         return bool(self.file_path)
+    
+
