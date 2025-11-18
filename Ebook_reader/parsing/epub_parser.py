@@ -17,7 +17,7 @@ class epub_parser(ebook_parser):
             book = epub.read_epub(self.file_path)
 
             self.book = book
-            self.get_meta()
+            
 
             return True
         except Exception as e:
