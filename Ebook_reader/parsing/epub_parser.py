@@ -10,6 +10,7 @@ class epub_parser(ebook_parser):
         self.book = None
         self._meta = None
         self._chapters = []
+        self._cover = None
 
     def read_ebook(self):
         if not self.validate_path():
@@ -18,36 +19,37 @@ class epub_parser(ebook_parser):
         try:
             book = epub.read_epub(self.file_path)
 
-            self._book = book
+            self.book = book
             self._load_meta()
             self._load_chapters()
+            self._load_cover()
             
 
             return True
         except Exception as e:
             print(f"Error: could not read EPUB file at {self.file_path}. Details: {e}")
-            self._book = None
+            self.book = None
         return False
     
     
     
     def _load_meta(self):
-        if not self._book:
+        if not self.book:
             return None
         
         try:
-            meta = self._book.metadata
+            meta = self.book.metadata
             self._meta = meta
             if not self._meta:
                 return False
             return True
         except Exception as e:
-            print(f"Error: oculd not read EPUB meta data at {self.file_path}. Details: {e}")
+            print(f"Error: could not read EPUB meta data at {self.file_path}. Details: {e}")
             self._meta = None
         return False
     
     def _load_chapters(self):
-        for item in self._book.get_items():
+        for item in self.book.get_items():
             if item.get_type() == ebooklib.ITEM_DOCUMENT:
                 self._chapters.append(item)
         return True
@@ -67,5 +69,25 @@ class epub_parser(ebook_parser):
             html_string = raw_data.decode('utf-8')   
             return html_string
         except Exception as e:
-            print(f"Error: oculd not read EPUB meta data at {self.file_path}. Details: {e}")
+            print(f"Error: could not read EPUB meta data at {self.file_path}. Details: {e}")
             return None
+        
+    def _load_cover(self):
+        try:
+            self._cover = self.book.get_item_with_id('cover-image')
+            return True
+        except Exception as e:
+            print(f"Error: could not load cover. Details: {e}")
+            return False
+
+
+    def get_cover(self):
+        cover_item = self._cover
+        if cover_item:
+            image_bytes = cover_item.get_content()
+            mime_type = cover_item.get_media_type()
+            return image_bytes, mime_type
+        
+        return None, None
+        
+    
