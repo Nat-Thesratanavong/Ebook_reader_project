@@ -32,7 +32,6 @@ class epub_parser(ebook_parser):
         return False
     
     
-    
     def _load_meta(self):
         if not self.book:
             return None
@@ -53,6 +52,15 @@ class epub_parser(ebook_parser):
             if item.get_type() == ebooklib.ITEM_DOCUMENT:
                 self._chapters.append(item)
         return True
+    
+    def _load_cover(self):
+        try:
+            self._cover = self.book.get_item_with_id('cover-image')
+            return True
+        except Exception as e:
+            print(f"Error: could not load cover. Details: {e}")
+            return False
+
     def get_meta(self):
             if(self._meta):
                 meta = self._meta
@@ -71,15 +79,6 @@ class epub_parser(ebook_parser):
         except Exception as e:
             print(f"Error: could not read EPUB meta data at {self.file_path}. Details: {e}")
             return None
-        
-    def _load_cover(self):
-        try:
-            self._cover = self.book.get_item_with_id('cover-image')
-            return True
-        except Exception as e:
-            print(f"Error: could not load cover. Details: {e}")
-            return False
-
 
     def get_cover(self):
         cover_item = self._cover
@@ -90,4 +89,8 @@ class epub_parser(ebook_parser):
         
         return None, None
         
-    
+    def get_images(self):
+        images = {}
+        for item in self.book.get_items_of_type(ebooklib.ITEM_IMAGE):
+            images.update({item.get_name():item.get_content()})
+        return images
