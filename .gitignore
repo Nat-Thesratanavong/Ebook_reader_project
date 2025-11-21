@@ -49,3 +49,7 @@ user_preferences.json
 
 # Output directory for packaged applications (if you use PyInstaller or similar)
 /dist/
+
+
+# Special
+epub_parser_backup.py
