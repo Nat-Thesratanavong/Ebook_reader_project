@@ -35,19 +35,20 @@ class LibraryDatabase:
                     cursor = conn.cursor()
                     cursor.executescript(sql_script)
                     conn.commit()
-            except Exception as e:
+            except Exception:
                 logger.exception(f"An error has occcured while creating table.")
                 raise
             
 
     def update_progress(self, book_hash, chapter_index, chapter_progress, total_book_progress ):
-        
+        current_time = datetime.now().isoformat
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             try:
-                self.queries.update_book_progress(conn, book_hash, chapter_index, chapter_progress, total_book_progress)
+                self.queries.update_book_progress(conn, book_hash, chapter_index, chapter_progress, total_book_progress, last_read = current_time)
+                logger.info("book updated successfully")
                 conn.commit()
-            except Exception as e:
+            except Exception:
                 logger.exception(f"An error has occured while update book.")
                 raise
             
@@ -59,10 +60,28 @@ class LibraryDatabase:
             try:
                 exist = self.queries.book_exist(conn, book_hash)
                 return exist
-            except Exception as e:
+            except Exception:
                 logger.exception(f"An error occured during checking book.")
                 raise 
             
-    # def add_book(self, book_hash):
-        
+    def add_book(self, book_hash, file_path, cover_path, title, author):
+        current_time = datetime.now().isoformat()
+
+        if not book_hash or not file_path:
+            raise ValueError("Both 'book_hash' and 'file_path' are required to add a book.")
+
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            try:
+                self.queries.insert_book(conn, book_hash, file_path, cover_path, title, author, None, None, None, current_time)
+                conn.commit()
+                logger.info("Added book to the library")
+                return True
+            except sqlite3.IntegrityError:
+                logger.warning("Book already exists: %s", book_hash)
+                return False
+            except Exception:
+                logger.exception("Failed to add book")
+                raise
+            
 
