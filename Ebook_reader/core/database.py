@@ -12,7 +12,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class LibraryDatabase:
-    def __init__(self, db_path = 'library.db'):
+    def __init__(self, db_path = None):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        db_path = os.path.join(base_dir, 'assets', 'sql', 'library.db')
         self.db_path = db_path
         self._load_queries()
         self._create_table()
@@ -22,12 +24,12 @@ class LibraryDatabase:
     
     def _load_queries(self):
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        sql_path = os.path.join(base_dir, '..', 'assets', 'sql', 'books.sql')
+        sql_path = os.path.join(base_dir, 'assets', 'sql', 'books.sql')
         self.queries = aiosql.from_path(sql_path, "sqlite3")
 
     def _create_table(self):
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        sql_path = os.path.join(base_dir, '..', 'assets', 'sql', 'schema.sql')
+        sql_path = os.path.join(base_dir, 'assets', 'sql', 'schema.sql')
         with open(sql_path, 'r') as f:
             sql_script = f.read()
             try:

@@ -53,10 +53,6 @@ select author, COUNT(hashed_book) from books group by author
 -- get Total number of books for each genre
 select genre, COUNT(hashed_book) from books group by genre
 
--- name: get_reading_progress
--- get reading progress
-SELECT current_chapter, chapter_progress, total_book_progress FROM books WHERE hashed_book = :hashed_book
-
 -- name: get_book
 -- get book by hash
 SELECT hashed_book, file_path, cover_path, title, author, current_chapter, chapter_progress, total_book_progress, last_read

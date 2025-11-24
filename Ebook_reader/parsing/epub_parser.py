@@ -2,7 +2,7 @@ import ebooklib
 from ebooklib import epub
 from .ebook_parser import ebook_parser
 
-
+# TO-DO: This parser needs working on chapters definition, load_chapters, get_chapter method.
 class epub_parser(ebook_parser):
 
     def __init__(self, file_path):
@@ -33,9 +33,10 @@ class epub_parser(ebook_parser):
             for item in self.book.get_items():
                 if item.get_type() == ebooklib.ITEM_DOCUMENT:
                     chapters.append(item)
+            self.chapters = chapters
         except Exception as e:
             print(f"Error: could not get chapters from {self.file_path}. Details: {e}")
-        return chapters
+        
 
     def get_meta(self):
         if not self.book:
