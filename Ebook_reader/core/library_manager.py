@@ -66,7 +66,24 @@ class LibraryManager:
                     )
             except Exception:
                 logger.exception(f"Failed to add bokk at {book_path}")
-        
+
+    def get_reading_progress(self, book_hash):
+        return self.db.get_reading_progress(book_hash)
+    
+    def update_reading_progress(self, book_hash, chapter_index, chapter_progress, total_book_progress):
+        return self.db.update_progress(book_hash, chapter_index, chapter_progress, total_book_progress)
+    
+    def remove_book(self, book_hash):
+        book = self.db.get_book(book_hash)
+        if book:
+            cover_path = book.get("cover_path")
+            if cover_path and os.path.exists(cover_path):
+                os.remove(cover_path)
+            self.db.delete_book(book_hash)
+            logger.info(f"Removed book with hash {book_hash}")
+
+    def search_book(self, query: str):
+        return self.db.search_books(query)
 
 
                 

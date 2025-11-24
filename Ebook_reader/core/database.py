@@ -51,7 +51,17 @@ class LibraryDatabase:
             except Exception:
                 logger.exception(f"An error has occured while update book.")
                 raise
-            
+
+    def get_reading_progress(self, book_hash):
+
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            try:
+                progress = self.queries.get_reading_progress(conn,book_hash)
+                return progress
+            except Exception:
+                logger.exception(f"Failed to obtain reading progress from {book_hash}")
+                return None          
 
     def book_exist(self, book_hash):
 
@@ -83,5 +93,57 @@ class LibraryDatabase:
             except Exception:
                 logger.exception("Failed to add book")
                 raise
+
+    def get_all_book(self):
+
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            try:
+                books = self.queries.get_all_book(conn)
+                return books
+            except Exception:
+                logger.exception("Failed to obtain books")
+                return None
             
+    def get_book_count(self):
+        
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            try:
+                book_count = self.queries.get_book_count(conn)
+                return book_count
+            except Exception:
+                logger.exception("Failed to obtain library statistics")
+                return None
+            
+    def get_book(self, book_hash):
+
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            try:
+                book = self.queries.get_book(book_hash)
+                return book
+            except Exception:
+                logger.exception(f"Failed to fetch book {book_hash}")
+                raise
+
+    def delete_book(self, book_hash):
+
+        with self._get_connection() as conn:
+            conn.row_factory = sqlite3.Row
+            try:
+                self.queries.delete_book(book_hash)
+            except Exception:
+                logger.exception(f"Failed to delete book with hash {book_hash}")
+                
+    def search_books(self, query: str):
+        
+        with self._get_connection() as conn:
+            try:
+                cursor = conn.cursor()
+                books = cursor.executescript(query)
+                return books
+            except Exception:
+                logger.exception(f"An error has occcured while creating table.")
+                return None    
 
