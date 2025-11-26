@@ -85,6 +85,14 @@ class LibraryManager:
     def search_book(self, query: str):
         return self.db.search_books(query)
 
+    def get_all_book(self):
+        return self.db.get_all_book()
+    
+    def get_book(self, book_hash):
+        return self.db.get_book(book_hash)
+    
+    def delete_book(self, book_hash):
+        self.db.delete_book(book_hash)
 
                 
                 
