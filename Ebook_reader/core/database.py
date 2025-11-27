@@ -5,32 +5,33 @@ import os
 import logging
 
 logging.basicConfig(
-    level=logging.INFO,         
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 
 logger = logging.getLogger(__name__)
 
+
 class LibraryDatabase:
-    def __init__(self, db_path = None):
+    def __init__(self, db_path=None):
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        db_path = os.path.join(base_dir, 'assets', 'sql', 'library.db')
+        db_path = os.path.join(base_dir, "assets", "sql", "library.db")
         self.db_path = db_path
         self._load_queries()
         self._create_table()
 
     def _get_connection(self):
         return sqlite3.connect(self.db_path)
-    
+
     def _load_queries(self):
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        sql_path = os.path.join(base_dir, 'assets', 'sql', 'books.sql')
+        sql_path = os.path.join(base_dir, "assets", "sql", "books.sql")
         self.queries = aiosql.from_path(sql_path, "sqlite3")
 
     def _create_table(self):
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        sql_path = os.path.join(base_dir, 'assets', 'sql', 'schema.sql')
-        with open(sql_path, 'r') as f:
+        sql_path = os.path.join(base_dir, "assets", "sql", "schema.sql")
+        with open(sql_path, "r") as f:
             sql_script = f.read()
             try:
                 with self._get_connection() as conn:
@@ -38,54 +39,73 @@ class LibraryDatabase:
                     cursor.executescript(sql_script)
                     conn.commit()
             except Exception:
-                logger.exception(f"An error has occcured while creating table.")
+                logger.exception("An error has occcured while creating table.")
                 raise
-            
 
-    def update_progress(self, book_hash, chapter_index, chapter_progress, total_book_progress ):
+    def update_progress(
+        self, book_hash, chapter_index, chapter_progress, total_book_progress
+    ):
         current_time = datetime.now().isoformat
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             try:
-                self.queries.update_book_progress(conn, book_hash, chapter_index, chapter_progress, total_book_progress, last_read = current_time)
+                self.queries.update_book_progress(
+                    conn,
+                    book_hash,
+                    chapter_index,
+                    chapter_progress,
+                    total_book_progress,
+                    last_read=current_time,
+                )
                 logger.info("book updated successfully")
                 conn.commit()
             except Exception:
-                logger.exception(f"An error has occured while update book.")
+                logger.exception("An error has occured while update book.")
                 raise
 
     def get_reading_progress(self, book_hash):
-
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             try:
-                progress = self.queries.get_reading_progress(conn,book_hash)
+                progress = self.queries.get_reading_progress(conn, book_hash)
                 return progress
             except Exception:
                 logger.exception(f"Failed to obtain reading progress from {book_hash}")
-                return None          
+                return None
 
     def book_exist(self, book_hash):
-
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             try:
                 exist = self.queries.book_exist(conn, book_hash)
                 return exist
             except Exception:
-                logger.exception(f"An error occured during checking book.")
-                raise 
-            
+                logger.exception("An error occured during checking book.")
+                raise
+
     def add_book(self, book_hash, file_path, cover_path, title, author):
         current_time = datetime.now().isoformat()
 
         if not book_hash or not file_path:
-            raise ValueError("Both 'book_hash' and 'file_path' are required to add a book.")
+            raise ValueError(
+                "Both 'book_hash' and 'file_path' are required to add a book."
+            )
 
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             try:
-                self.queries.insert_book(conn, book_hash, file_path, cover_path, title, author, None, None, None, current_time)
+                self.queries.insert_book(
+                    conn,
+                    book_hash,
+                    file_path,
+                    cover_path,
+                    title,
+                    author,
+                    None,
+                    None,
+                    None,
+                    current_time,
+                )
                 conn.commit()
                 logger.info("Added book to the library")
                 return True
@@ -97,7 +117,6 @@ class LibraryDatabase:
                 raise
 
     def get_all_book(self):
-
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             try:
@@ -106,9 +125,8 @@ class LibraryDatabase:
             except Exception:
                 logger.exception("Failed to obtain books")
                 return None
-            
+
     def get_book_count(self):
-        
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             try:
@@ -117,9 +135,8 @@ class LibraryDatabase:
             except Exception:
                 logger.exception("Failed to obtain library statistics")
                 return None
-            
-    def get_book(self, book_hash):
 
+    def get_book(self, book_hash):
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             try:
@@ -130,22 +147,19 @@ class LibraryDatabase:
                 raise
 
     def delete_book(self, book_hash):
-
         with self._get_connection() as conn:
             conn.row_factory = sqlite3.Row
             try:
                 self.queries.delete_book(book_hash)
             except Exception:
                 logger.exception(f"Failed to delete book with hash {book_hash}")
-                
+
     def search_books(self, query: str):
-        
         with self._get_connection() as conn:
             try:
                 cursor = conn.cursor()
                 books = cursor.executescript(query)
                 return books
             except Exception:
-                logger.exception(f"An error has occcured while creating table.")
-                return None    
-
+                logger.exception("An error has occcured while creating table.")
+                return None

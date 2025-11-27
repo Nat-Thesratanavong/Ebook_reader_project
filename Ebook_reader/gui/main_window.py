@@ -1,12 +1,8 @@
-from PySide6.QtWidgets import QMainWindow, QStackedWidget, QVBoxLayout, QWidget
-# from .book_list_view import BookListView
-# from .book_details_view import BookDetailsView
+from PySide6.QtCore import QObject
 
-class MainWindow(QMainWindow):
-    def __init__(self, library_manager):
+
+class MainWindow(QObject):
+    def __init__(self):
         super().__init__()
-        self.library_manager = library_manager
-        self.setWindowTitle("E-Reader")
-        self.setGeometry(100, 100, 800, 600)
-
-        
+        # Future logic for the main menu will go here
+        print("Backend initialized")
